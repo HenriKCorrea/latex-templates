@@ -18,8 +18,8 @@ jobs:
 
       - name: Archive texmf templates
         run: |
-          tar -czf texmf-${{ github.ref_name }}.tar.gz texmf
-          zip -r texmf-${{ github.ref_name }}.zip texmf
+          tar -czf texmf-${{ github.ref_name }}.tar.gz -C texmf .
+          zip -r texmf-${{ github.ref_name }}.zip texmf/*
 
       - name: Create draft release with artifacts
         env:
@@ -30,4 +30,6 @@ jobs:
             texmf-${{ github.ref_name }}.zip \
             --draft \
             --title "LaTeX Templates ${{ github.ref_name }}" \
-            --notes "## Release notes\n\nFill in details here."
+            --notes "## Release notes
+            
+            Fill in details here."
