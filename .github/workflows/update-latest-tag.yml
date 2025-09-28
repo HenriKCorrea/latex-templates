@@ -1,0 +1,20 @@
+name: Update Latest Tag
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+
+jobs:
+  update-latest-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update latest tag to this release
+        uses: EndBug/latest-tag@latest
