@@ -5,6 +5,10 @@ on:
     types: [published]
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag version to set latest to (e.g., v1.0.0)'
+        required: true
 
 jobs:
   update-latest-tag:
@@ -13,8 +17,20 @@ jobs:
       contents: write
 
     steps:
+
+      - name: Set tag ref
+        id: tagref
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "ref=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tagref.outputs.ref }}
 
       - name: Update latest tag to this release
         uses: EndBug/latest-tag@latest
