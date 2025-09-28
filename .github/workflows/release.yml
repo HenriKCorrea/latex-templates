@@ -1,0 +1,202 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'       # Matches v1.0.0, v2.1.3, etc.
+      - 'v*.*.*-*'     # Matches v1.0.0-alpha, v1.0.0-beta.1, etc.
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases and uploading assets
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+      
+      - name: Verify semantic version tag
+        id: version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          
+          # Validate semantic versioning format
+          if [[ ! $TAG_NAME =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "Error: Tag '$TAG_NAME' does not follow semantic versioning (vX.Y.Z or vX.Y.Z-prerelease)"
+            exit 1
+          fi
+          
+          echo "✅ Valid semantic version tag: $TAG_NAME"
+      
+      - name: Create archive
+        id: archive
+        run: |
+          VERSION=${{ github.ref_name }}
+          ARCHIVE_NAME="texmf-templates-${VERSION}"
+          ARCHIVE_FILE="${ARCHIVE_NAME}.tar.gz"
+          
+          echo "Creating archive: $ARCHIVE_FILE"
+          
+          # Create temporary directory for clean archive structure
+          mkdir -p /tmp/$ARCHIVE_NAME
+          
+          # Copy all files except .git and other unwanted files
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='*.tar.gz' \
+            --exclude='.gitignore' \
+            ./ /tmp/$ARCHIVE_NAME/
+          
+          # Create the archive
+          cd /tmp
+          tar -czf $ARCHIVE_FILE $ARCHIVE_NAME
+          
+          # Move back to workspace
+          mv $ARCHIVE_FILE $GITHUB_WORKSPACE/
+          
+          # Calculate checksums
+          cd $GITHUB_WORKSPACE
+          sha256sum $ARCHIVE_FILE > ${ARCHIVE_FILE}.sha256
+          md5sum $ARCHIVE_FILE > ${ARCHIVE_FILE}.md5
+          
+          echo "archive_name=$ARCHIVE_NAME" >> $GITHUB_OUTPUT
+          echo "archive_file=$ARCHIVE_FILE" >> $GITHUB_OUTPUT
+          
+          echo "✅ Archive created successfully"
+          ls -la $ARCHIVE_FILE*
+      
+      - name: Generate changelog
+        id: changelog
+        run: |
+          TAG_NAME=${{ steps.version.outputs.tag_name }}
+          
+          # Try to get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 $TAG_NAME^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Generating changelog from $PREVIOUS_TAG to $TAG_NAME"
+            CHANGELOG=$(git log $PREVIOUS_TAG..$TAG_NAME --oneline --pretty=format:"- %s (%h)" | head -20)
+          else
+            echo "No previous tag found, listing recent commits"
+            CHANGELOG=$(git log --oneline --pretty=format:"- %s (%h)" -10)
+          fi
+          
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Initial release"
+          fi
+          
+          # Save changelog to file for multiline output
+          echo "$CHANGELOG" > changelog.txt
+          echo "changelog_file=changelog.txt" >> $GITHUB_OUTPUT
+      
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          release_name: LaTeX Templates v${{ github.ref_name }}
+          body: |
+            # LaTeX Templates Collection v${{ github.ref_name }}
+            
+            A curated collection of LaTeX templates for researchers and LaTeX enthusiasts.
+            
+            ## 📦 Installation
+            
+            ### Option 1: Download and Extract
+            ```bash
+            # Download the archive
+            curl -L -o texmf-templates.tar.gz https://github.com/HenriKCorrea/texmf/releases/download/${{ steps.version.outputs.tag_name }}/${{ steps.archive.outputs.archive_file }}
+            
+            # Extract to your texmf directory
+            tar -xzf texmf-templates.tar.gz -C ~/
+            mv ~/texmf-templates-${{ github.ref_name }} ~/texmf
+            
+            # Update LaTeX database
+            texhash ~/texmf
+            ```
+            
+            ### Option 2: Git Clone (Development)
+            ```bash
+            git clone https://github.com/HenriKCorrea/texmf.git ~/texmf
+            texhash ~/texmf
+            ```
+            
+            ## 📋 What's Included
+            
+            - UFRGS Institute of Informatics document classes
+            - SBC (Brazilian Computer Society) paper templates  
+            - Beamer presentation themes
+            - abnTeX2 components for Brazilian standards
+            - Bibliography styles and supporting files
+            
+            ## 🔍 Verification
+            
+            Verify the download integrity:
+            ```bash
+            # Check SHA256
+            sha256sum -c ${{ steps.archive.outputs.archive_file }}.sha256
+            
+            # Check MD5
+            md5sum -c ${{ steps.archive.outputs.archive_file }}.md5
+            ```
+            
+            ## 📝 Recent Changes
+            
+            $(cat changelog.txt)
+            
+            ## 🆘 Support
+            
+            - 📖 [Documentation](https://github.com/HenriKCorrea/texmf#readme)
+            - 🐛 [Report Issues](https://github.com/HenriKCorrea/texmf/issues)
+            - 💬 [Discussions](https://github.com/HenriKCorrea/texmf/discussions)
+          
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag_name, '-') }}
+      
+      - name: Upload release archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.archive.outputs.archive_file }}
+          asset_name: ${{ steps.archive.outputs.archive_file }}
+          asset_content_type: application/gzip
+      
+      - name: Upload SHA256 checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.archive.outputs.archive_file }}.sha256
+          asset_name: ${{ steps.archive.outputs.archive_file }}.sha256
+          asset_content_type: text/plain
+      
+      - name: Upload MD5 checksum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.archive.outputs.archive_file }}.md5
+          asset_name: ${{ steps.archive.outputs.archive_file }}.md5
+          asset_content_type: text/plain
+      
+      - name: Release summary
+        run: |
+          echo "🎉 Release created successfully!"
+          echo "📦 Archive: ${{ steps.archive.outputs.archive_file }}"
+          echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"
+          echo ""
+          echo "The following assets were uploaded:"
+          echo "- ${{ steps.archive.outputs.archive_file }}"
+          echo "- ${{ steps.archive.outputs.archive_file }}.sha256"
+          echo "- ${{ steps.archive.outputs.archive_file }}.md5"
