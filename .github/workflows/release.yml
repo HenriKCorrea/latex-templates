@@ -19,7 +19,7 @@ jobs:
       - name: Archive texmf templates
         run: |
           tar -czf texmf-${{ github.ref_name }}.tar.gz -C texmf .
-          zip -r texmf-${{ github.ref_name }}.zip texmf/*
+          (cd texmf && zip -r ../texmf-${{ github.ref_name }}.zip .)
 
       - name: Create draft release with artifacts
         env:
