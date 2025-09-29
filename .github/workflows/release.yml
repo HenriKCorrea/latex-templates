@@ -64,7 +64,7 @@ jobs:
             texmf-${{ github.ref_name }}.tar.gz \
             texmf-${{ github.ref_name }}.zip \
             --draft \
-            --title "LaTeX Templates ${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
             --notes "## Release notes
             
             Fill in details here.
