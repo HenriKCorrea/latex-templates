@@ -21,6 +21,37 @@ jobs:
           tar -czf texmf-${{ github.ref_name }}.tar.gz -C texmf .
           (cd texmf && zip -r ../texmf-${{ github.ref_name }}.zip .)
 
+      # Generate image metadata (name, tags, labels) based on the contents of the repository
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: | 
+            ${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}
+          flavor: |
+            latest=auto
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}-{{pre}}
+            type=sha
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+
       - name: Create draft release with artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,4 +63,7 @@ jobs:
             --title "LaTeX Templates ${{ github.ref_name }}" \
             --notes "## Release notes
             
-            Fill in details here."
+            Fill in details here.
+            
+            ### DockerHub Image
+            https://hub.docker.com/r/${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}/tags?page=1&name=${{ github.ref_name }}"
