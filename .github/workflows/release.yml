@@ -52,6 +52,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           annotations: ${{ steps.meta.outputs.annotations }}
 
+      - name: Remove leading v from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
       - name: Create draft release with artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,4 +70,4 @@ jobs:
             Fill in details here.
             
             ### DockerHub Image
-            https://hub.docker.com/r/${{ vars.DOCKER_USERNAME }}/${{ github.event.repository.name }}/tags?page=1&name=${{ github.ref_name }}"
+            https://hub.docker.com/layers/${{ vars.DOCKER_USERNAME }}/${{  github.event.repository.name }}/${{ steps.version.outputs.version }}"
