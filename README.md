@@ -24,15 +24,16 @@ The main focus areas include:
 
 ## Available Templates
 
-| Name | Type | Description | Original Source | Version |
-|------|------|-------------|-----------------|---------|
-| `iiufrgs.cls` | Document Class | UFRGS Institute of Informatics document formatting for theses, dissertations, reports, and academic documents | UFRGS TeX Users Group | v4.4.0 |
-| `sa.cls` | Document Class | Template for "Seminário de Andamento" (Progress Seminar) articles | UFRGS TeX Users Group | - |
-| `iiletter.cls` | Document Class | Official letters with UFRGS Institute of Informatics letterhead | UFRGS TeX Users Group | - |
-| `sbc-template.sty` | Package | Brazilian Computer Society (SBC) conference paper template | SBC | 2017 |
-| `beamerthemeInf.sty` | Beamer Theme | Presentation theme based on UFRGS Institute of Informatics visual identity | Bruno Menegola | 2012 |
-| `abntex2.cls` | Document Class | Brazilian ABNT standards for academic documents | abnTeX2 Project | - |
-| `abntex2cite.sty` | Package | Citation style following Brazilian ABNT standards | abnTeX2 Project | - |
+| Name                      | Type           | Description                                                                                                   | Original Source                                                     | Version | License            |
+| ------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------- | ------------------ |
+| `iiufrgs.cls`             | Document Class | UFRGS Institute of Informatics document formatting for theses, dissertations, reports, and academic documents | [UFRGS TeX Users Group](https://www.inf.ufrgs.br/utug/)             | v4.4.0  | GPL-2.0            |
+| `sa.cls`                  | Document Class | Template for "Seminário de Andamento" (Progress Seminar) articles                                             | [UFRGS TeX Users Group](https://www.inf.ufrgs.br/utug/)             | -       | GPL-2.0            |
+| `iiletter.cls`            | Document Class | Official letters with UFRGS Institute of Informatics letterhead                                               | [UFRGS TeX Users Group](https://www.inf.ufrgs.br/utug/)             | -       | GPL-2.0            |
+| `sbc-template.sty`        | Package        | Brazilian Computer Society (SBC) conference paper template                                                    | [SBC](https://www.sbc.org.br/documentosinstitucionais/#publicacoes) | 2017    | Custom (BSD style) |
+| `beamerthemeInf.sty`      | Beamer Theme   | Presentation theme based on UFRGS Institute of Informatics visual identity                                    | [UFRGS TeX Users Group](https://www.inf.ufrgs.br/utug/)             | 2012    | LPPL               |
+| `abntex2.cls`             | Document Class | Brazilian ABNT standards for academic documents                                                               | [UFRGS TeX Users Group](https://www.inf.ufrgs.br/utug/)             | -       | LPPL               |
+| `abntex2cite.sty`         | Package        | Citation style following Brazilian ABNT standards                                                             | [UFRGS TeX Users Group](https://www.inf.ufrgs.br/utug/)             | -       | LPPL               |
+| `prisma-flow-diagram.sty` | Package        | Abstraction for creating PRISMA 2020 flow diagrams in LaTeX                                                   | [Ezequiel Santos](https://github.com/ezefranca/prisma-flow-diagram) | 1.1.0   | LPPL-1.3c          |
 
 ## Installation & Setup
 
@@ -192,7 +193,7 @@ Templates are updated on-demand based on changes from original authors. To reque
 ### Issues & Support
 
 - **Bug Reports**: Use [GitHub Issues](https://github.com/HenriKCorrea/texmf/issues)
-- **Feature Requests**: Submit through GitHub Issues
+- **Discussions and Feature Requests**: Submit through GitHub Issues
 - **Template Modifications**: This project does not accept custom changes to template contents
   - Submit changes to original template authors first
   - This project will then incorporate approved updates
@@ -206,18 +207,7 @@ Templates are updated on-demand based on changes from original authors. To reque
 
 ## License & Attribution
 
-Each template maintains its original license and attribution. See individual files for specific licensing terms.
-
-- IIUFRGS templates: GNU General Public License
-- SBC template: Created by Jomi Hubner & Rafael Bordini
-- Beamer theme: LaTeX Project Public License (Bruno Menegola)
-- abnTeX2 components: LaTeX Project Public License
-
-## Support & Community
-
-- **Issues**: [GitHub Issues](https://github.com/HenriKCorrea/texmf/issues)
-- **Discussions**: Use GitHub Discussions for general questions
-- **Original Communities**: Refer to original template authors for template-specific support
+Each template maintains its original license and attribution. See [Available templates](#available-templates) individual files for specific licensing terms.
 
 ---
 
