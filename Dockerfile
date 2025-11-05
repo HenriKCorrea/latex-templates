@@ -6,3 +6,11 @@ RUN TEXMFLOCAL="$(kpsewhich -var-value TEXMFLOCAL)" && \
     cp -r /tmp/texmf/* "$TEXMFLOCAL/" && \
     texhash "$TEXMFLOCAL" && \
     rm -rf /tmp/texmf/
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+        git-lfs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    
+# Install git LFS    
+RUN git lfs install
